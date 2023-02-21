@@ -1,45 +1,53 @@
+const textBox = document.getElementById("newText");
+const myList = document.getElementById("tdList");
+//Makes sure the local storage counter never returns NULL, may cause errors if it does
 if(localStorage.getItem("numOfItems") == null){
     localStorage.setItem("numOfItems", "0");
 }
-function clickedComplete(passedItem){
-    passedItem.classList = "done";
-    localStorage.setItem(`isDone${passedItem.id}`, "done");
+//Crosses off List Item
+function clickedComplete(dex){
+    myList.children[dex].classList = "done";
+    localStorage.setItem(`isDone${dex}`, "done");
 }
-function clickedUndo(passedItem){
-    passedItem.classList = "notDone";
-    localStorage.setItem(`isDone${passedItem.id}`, "notDone");
+//Uncroses list item
+function clickedUndo(dex){
+    myList.children[dex].classList = "notDone";
+    localStorage.setItem(`isDone${dex}`, "notDone");
 }
+//Puts list Items onto the page
 function addToList(index){
     let newItem = document.createElement("li");
-    newItem.innerHTML = `${localStorage.getItem(`info${index}`)} <input id="buttonFor${index}" type="Button" value="complete"> <input id="undoButtonFor${index}" type="Button" value="Not Done">`;
+    newItem.innerHTML = `${localStorage.getItem(`info${index}`)}    <input id="buttonFor${index}" type="Button" value="complete">  <input id="undoButtonFor${index}" type="Button" value="Not Done">`;
     newItem.id = `${index}`;
     let checkDone = `isDone${index}`;
     newItem.classList = localStorage.getItem(checkDone);
     document.getElementById("tdList").append(newItem);
-    let buttonID = `buttonFor${index}`;
-    let undoButtonID = `undoButtonFor${index}`;
-    document.getElementById(buttonID).onclick = function(){clickedComplete(newItem)};
-    document.getElementById(undoButtonID).onclick = function(){clickedUndo(newItem)};
 }
-if(localStorage.getItem("numOfItems")!=null){
-    let num = parseInt(localStorage.getItem("numOfItems"));
-    for(let i = 0; i<num;i++){
-        let newItem = document.createElement("li");
-        newItem.innerHTML = `${localStorage.getItem(`info${i}`)} <input id="buttonFor${i}" type="Button" value="complete"> <input id="undoButtonFor${i}" type="Button" value="Not Done">`;
-        newItem.id = `${i}`;
-        let checkDone = `isDone${i}`;
-        newItem.classList = localStorage.getItem(checkDone);
-        document.getElementById("tdList").append(newItem);
-        let buttonID = `buttonFor${i}`;
-        let undoButtonID = `undoButtonFor${i}`;
-        document.getElementById(buttonID).onclick = function(){clickedComplete(newItem)};
-        document.getElementById(undoButtonID).onclick = function(){clickedUndo(newItem)};
-    }
-}
+//add new list item to sttorage and the page once form is Submitted
 function submitFunc(evt){
     evt.preventDefault();
     localStorage.setItem("numOfItems", parseInt(localStorage.getItem("numOfItems"))+1);
     localStorage.setItem(`info${parseInt(localStorage.getItem("numOfItems"))-1}`, document.querySelector("form#addTDForm input#newText").value);
     addToList(localStorage.getItem("numOfItems")-1);
+    textBox.value = "";
 }
+//Adds list Items from local Storage to the page
+if(localStorage.getItem("numOfItems")!=0){
+    let num = parseInt(localStorage.getItem("numOfItems"));
+    for(let i = 0; i<num;i++){
+        addToList(i);
+    }
+}
+//Listens for clicks to the complete and notDone Buttons
+myList.addEventListener("click", function(evt){
+    if(evt.target.tagName === 'INPUT'){
+        if(evt.target.value == "complete"){
+            let myIndex = Array.prototype.indexOf.call(myList.children, evt.target.parentElement);
+            clickedComplete(myIndex)
+        }else{
+            let myIndex = Array.prototype.indexOf.call(myList.children, evt.target.parentElement);
+            clickedUndo(myIndex)
+        }
+    }
+})
 document.getElementById("addTDForm").addEventListener('submit', submitFunc);
